@@ -66,6 +66,22 @@ var activeBand = null;
 // Section 1 - Choose a species
 // Create a list of items for the dropdown menu, displaying species codes
 ////////////////////////////////////////////////////////////////////////////////////////////
+var title0a = ui.Label(
+  "In 2025, BAM launches v5 of our new North America avian density models. Compared with v4 released 5 years ago. Key improvements in v5 include:\n\n" +
+  "• Model expansion to United States\n" +
+  "• Application of temporal matching to covariate\n" +
+  "• Introduction of avian data from new sources (e.g., eBird)\n" +
+  "• Prediction year range: 1985-2020",
+  {whiteSpace: 'pre-wrap'}
+);
+panel.add(title0a);
+
+var title0b = ui.Label(
+  "With this web app, you can visualise the model through 3 filters: 1. by species code, 2. by prediction year, 3. by band \n",
+  {whiteSpace: 'pre-wrap'}
+);
+panel.add(title0b);
+
 var title1 = ui.Label('Step 1: Select a species');
 panel.add(title1);
 
