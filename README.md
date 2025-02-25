@@ -1,5 +1,16 @@
 # **Models_GEEapp**
 
+### **Linked Map GEE App for presenting the model raster (v4)**
+🔗 [**Linked Map Chart Version**](https://bamdensitymap.projects.earthengine.app/view/densitymaplinkedmap)
+
+#### **Drop-down menu options: 1.Species and Year**
+---
+
+### **Split-panelled GEE App for presenting the model raster (v3)**
+🔗 [**Split-panelled Chart Version**](https://bamdensitymap.projects.earthengine.app/view/densitymapsplitpanel)
+
+#### **Drop-down menu options: 1.Species and Year**
+---
 ### **Visually-optimised GEE App for presenting the model raster (v2)**
 🔗 [**View the Density Model v5**](https://bamdensitymap.projects.earthengine.app/view/densitymapv5visual)
 
