@@ -1,95 +1,77 @@
-// Define band-specific visualization ranges
-var BAND_RANGES = {
-    'b1': { min: 0.0, max: 0.2, palette: ['blue', 'green', 'yellow', 'red'] },
-    'b2': { min: 0.0, max: 5.0, palette: ['blue', 'green', 'yellow', 'red'] },
-    'b3': { min: 0.0, max: 1.0, palette: ['blue', 'green', 'yellow', 'red'] },
-    'b4': { min: 0, max: 10000000, palette: ['blue', 'green', 'yellow', 'red'] }
-  };
-  
-  // Function to load and extract a specific band from the selected asset
-  function getRasterBand(asset, band) {
-    var image = ee.Image(asset).select([band]); 
-    return image.visualize(BAND_RANGES[band]); 
-  }
-  
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  // Organizing the assets
-  var assets = {
-    'TEWA 2010': 'projects/rnationalmodel/assets/TEWA_mosaic_2010',
-    'TEWA 2015': 'projects/rnationalmodel/assets/TEWA_mosaic_2015',
-    'VESP 1985': 'projects/rnationalmodel/assets/VESP_mosaic_1985',
-    'VESP 2020': 'projects/rnationalmodel/assets/VESP_mosaic_2020',
-    'YBFL 1990': 'projects/rnationalmodel/assets/YBFL_mosaic_1990'
-  };
-  
-  // Band names for display
-  var BANDS = ['b1', 'b2', 'b3', 'b4'];
-  
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  // Create a map for each band.
-  var maps = [];
-  BANDS.forEach(function(band, index) {
-    var map = ui.Map();
-    map.add(ui.Label('Band ' + (index + 1))); // Label each map with Band Number
-    map.setControlVisibility(false);
-    map.setCenter(-110, 60, 3); 
-    maps.push(map);
+// Function to load and visualize the first band of a raster asset
+function getRasterComposite(asset) {
+  var image = ee.Image(asset).select(['b1']); // Select only the first band
+  return image.visualize({
+    min: 0.0,
+    max: 0.2,
+    palette: ['blue', 'green', 'yellow', 'red']
   });
-  
-  // Link all maps together for synchronized panning and zooming.
-  var linker = ui.Map.Linker(maps);
-  
-  // Enable zooming on the top-left map.
-  maps[0].setControlVisibility({zoomControl: true});
-  
-  // Show the scale (e.g., '500m') on the bottom-right map.
-  maps[3].setControlVisibility({scaleControl: true});
-  
-  // Function to update all maps with the selected dataset
-  function updateMaps(selection) {
-    var selectedAsset = assets[selection];
-    
-    // Apply the correct band visualization to each map
-    maps.forEach(function(map, index) {
-      var band = BANDS[index]; // Get the correct band for this map
-      map.layers().set(0, ui.Map.Layer(getRasterBand(selectedAsset, band), {}, 'Band ' + (index + 1)));
-      map.setCenter(-110, 60, 3); 
-    });
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+// Organizing the assets with the correct label and path
+var layers = {
+  'BAWW 2000': getRasterComposite('projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2000'),
+  'BAWW 2005': getRasterComposite('projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2005'),
+  'BAWW 2010': getRasterComposite('projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2010'),
+  'BAWW 2015': getRasterComposite('projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2015'),
+  'BAWW 2020': getRasterComposite('projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2020'),
+  'TEWA 2010': getRasterComposite('projects/rnationalmodel/assets/TEWA_mosaic_2010'),
+  'TEWA 2015': getRasterComposite('projects/rnationalmodel/assets/TEWA_mosaic_2015'),
+  'VESP 1985': getRasterComposite('projects/rnationalmodel/assets/VESP_mosaic_1985'),
+  'VESP 2020': getRasterComposite('projects/rnationalmodel/assets/VESP_mosaic_2020'),
+  'YBFL 1990': getRasterComposite('projects/rnationalmodel/assets/YBFL_mosaic_1990'),
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Set up the maps and control widgets
+
+// Create the left map, and have it display the first layer.
+var leftMap = ui.Map();
+leftMap.setControlVisibility(false);
+var leftSelector = addLayerSelector(leftMap, 0, 'top-left');
+
+// Create the right map, and have it display the second layer.
+var rightMap = ui.Map();
+rightMap.setControlVisibility(false);
+var rightSelector = addLayerSelector(rightMap, 1, 'top-right');
+
+// Function to add a layer selection dropdown for each map.
+function addLayerSelector(mapToChange, defaultValue, position) {
+  var label = ui.Label('Choose the species and prediction year');
+
+  // Update the map when a new layer is selected
+  function updateMap(selection) {
+    mapToChange.layers().set(0, ui.Map.Layer(layers[selection]));
   }
-  
-  // Create a dropdown to select the dataset
+
+  // Create dropdown menu for selecting layers
   var select = ui.Select({
-    items: Object.keys(assets),
-    onChange: updateMaps
+    items: Object.keys(layers), 
+    onChange: updateMap
   });
-  select.setValue(Object.keys(assets)[0], true); 
-  
-  // Create a control panel for the dropdown
-  var controlPanel = ui.Panel({
-    widgets: [ui.Label('Select a dataset:'), select],
-    layout: ui.Panel.Layout.flow('horizontal'),
-    style: {position: 'top-center'}
-  });
-  
-  // Create a grid of maps.
-  var mapGrid = ui.Panel(
-    [
-      ui.Panel([maps[0], maps[1]], null, {stretch: 'both'}),
-      ui.Panel([maps[2], maps[3]], null, {stretch: 'both'})
-    ],
-    ui.Panel.Layout.Flow('horizontal'), {stretch: 'both'}
-  );
-  
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  // Create a title
-  var title = ui.Label('Population, Uncertainty, and Extrapolation of Prediction Rasters', {
-    stretch: 'horizontal',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: '20px'
-  });
-  
-  // Add elements to the UI
-  ui.root.widgets().reset([title, controlPanel, mapGrid]);
-  ui.root.setLayout(ui.Panel.Layout.Flow('vertical'));
-  
+  select.setValue(Object.keys(layers)[defaultValue], true);
+
+  var controlPanel = ui.Panel({widgets: [label, select], style: {position: position}});
+  mapToChange.add(controlPanel);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Tie everything together
+
+// Create a SplitPanel for side-by-side map comparison
+var splitPanel = ui.SplitPanel({
+  firstPanel: leftMap,
+  secondPanel: rightMap,
+  wipe: true,
+  style: {stretch: 'both'}
+});
+
+// Set the SplitPanel as the UI root
+ui.root.widgets().reset([splitPanel]);
+
+// Link the two maps together (sync zoom and pan)
+var linker = ui.Map.Linker([leftMap, rightMap]);
+
+// Set initial map center to a reasonable default location
+leftMap.setCenter(-100, 58, 3.5);
