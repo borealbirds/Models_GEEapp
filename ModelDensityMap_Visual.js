@@ -3,16 +3,13 @@
 // Map visualization parameters
 ////////////////////////////////////////////////////////////////////////////////////////////
 var layers = {
-  //'OVEN': [
-    //{ year: 1985, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_1985' },
-    //{ year: 1990, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_1990' },
-    //{ year: 1995, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_1995' },
-    //{ year: 2000, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_2000' },
-    //{ year: 2005, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_2005' },
-    //{ year: 2010, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_2010' },
-    //{ year: 2015, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_2015' },
-    //{ year: 2020, asset: 'projects/rnationalmodel/assets/OVEN_mosaic_2020' }
-  //],
+  'BAWW': [
+    { year: 2000, asset: 'projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2000' },
+    { year: 2005, asset: 'projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2005' },
+    { year: 2010, asset: 'projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2010' },
+    { year: 2015, asset: 'projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2015' },
+    { year: 2020, asset: 'projects/bamp-nationalmodel/assets/BAWW/BAWW_mosaic_2020' }
+  ],
   'TEWA': [
     { year: 2010, asset: 'projects/rnationalmodel/assets/TEWA_mosaic_2010' },
     { year: 2015, asset: 'projects/rnationalmodel/assets/TEWA_mosaic_2015' }
@@ -82,7 +79,7 @@ var title0b = ui.Label(
 );
 panel.add(title0b);
 
-var title1 = ui.Label('Step 1: Select a species');
+var title1 = ui.Label('Step 1: Select a species', {fontWeight: 'bold', fontSize: '14px', Color:'green'});
 panel.add(title1);
 
 // Dropdown menu for selecting layers
@@ -113,7 +110,7 @@ panel.add(speciesSelector);
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Step 2: Select a Year
 ////////////////////////////////////////////////////////////////////////////////////////////
-panel.add(ui.Label('Step 2: Select a year'));
+panel.add(ui.Label('Step 2: Select a year', {fontWeight: 'bold', fontSize: '14px', Color:'green'}));
 
 var yearSelector = ui.Select({
   placeholder: 'Select a year',
@@ -135,7 +132,27 @@ panel.add(yearSelector);
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Step 3: Select a Band
 ////////////////////////////////////////////////////////////////////////////////////////////
-panel.add(ui.Label('Step 3: Select a band (1-5)'));
+panel.add(ui.Label('Step 3: Select a band (1-5) :', {fontWeight: 'bold', fontSize: '14px', Color:'green'}));
+
+// List of band explanations with smaller font size
+var bandDescriptions = [
+  '• Band 1: Mean predicted density across bootstraps',
+  '• Band 2: Coefficient of variation of density across bootstraps',
+  '• Band 3: Mean areas of model extrapolation across bootstraps',
+  '• Band 4: Mean km to nearest detection across bootstraps',
+  '• Band 5: Mean predicted density restricted to probable species range'
+];
+
+// Create a list with smaller font size
+var bandList = ui.Panel(
+  bandDescriptions.map(function(text) {
+    return ui.Label(text, {fontSize: '9px'});
+  }),
+  ui.Panel.Layout.flow('vertical')  // Arrange labels vertically
+);
+
+// Add the list to the main panel
+panel.add(bandList);
 
 var bandSelector = ui.Select({
   placeholder: 'Select a band',
@@ -157,10 +174,11 @@ var bandSelector = ui.Select({
       var range = bandRanges[activeBand];
 
       Map.addLayer(image, 
-        { min: range.min, max: range.max, palette: ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837'] },
+        { min: range.min, max: range.max, palette: ['blue', 'green', 'yellow', 'red'] },
         activeSpecies + ' - ' + activeYear + ' (Band ' + activeBand + ')'
       );
       // i try a more visible color palette: ['blue', 'green', 'yellow', 'red']
+      // the v4's palelet ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837']
       selectedAssetLabel.setValue('Asset name: ' + selectedLayer.asset);
     }
   }
@@ -177,7 +195,7 @@ panel.add(title5);
 // Section 3 - 
 // Download link 1,2,3
 ////////////////////////////////////////////////////////////////////////////////////////////
-var title6 = ui.Label('Last step: Download options');
+var title6 = ui.Label('Last step: Download options', {fontWeight: 'bold', fontSize: '14px', Color:'green'});
 panel.add(title6);
 
 // Download link 1
@@ -237,9 +255,11 @@ var defaultImage = ee.Image(defaultLayer.asset).select([0]); // Load the default
 Map.addLayer(
   defaultImage,
   {
-    //min: 0.0, 
-    //max: 0.2, 
-    palette: ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837'] ,
+    min: 0.0, 
+    max: 0.2, 
+    palette: ['blue', 'green', 'yellow', 'red'] ,
+// i try a more visible color palette: ['blue', 'green', 'yellow', 'red']
+// the v4's palelet ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837']
     crs: projection.crs(), 
     crsTransform: projection.transform() 
   },
@@ -271,8 +291,10 @@ var legendTitle = ui.Label({
 legend.add(legendTitle);
 
 // Define color scale and labels
-var colorPalette = ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837'];
-var labels = ['Low', '', '', '', 'High'];  // Adjust labels for clarity
+var colorPalette = ['blue', 'green', 'yellow', 'red'];
+// i try a more visible color palette: ['blue', 'green', 'yellow', 'red']
+// the v4's palelet ['#FFFF99', '#C2E699', '#78C679', '#31A354', '#006837']
+var labels = ['Low', '', '', 'High'];  // Adjust labels for clarity
 
 // Create a row for each color
 for (var i = 0; i < colorPalette.length; i++) {
